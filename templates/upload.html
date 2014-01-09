@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block body %}
+<input type="file" name="afile" id="afile" multiple/>
+
+<form action="/upload" method="POST" enctype="multipart/form-data">
+<input type="file" name="file" multiple/>
+<input type="submit">
+</form>
+
+<div id="files" style="margin-top:10px">
+</div>
+<script>
+document.querySelector('#afile').addEventListener('change', function(e) {
+  var files = document.getElementById("afile").files;
+  for (var i = 0; i < files.length; i++)
+    upload(files[i]);
+}, false);
+
+
+var upload = function(file) {
+  var fd = new FormData();
+  fd.append("file", file);
+  fd.append("source", "web"); 
+
+  var fileDiv = document.createElement("div");
+  fileDiv.className = "progress progress-striped active";
+  var progressDiv = document.createElement("div");
+  progressDiv.className = "progress-bar progress-bar-success";
+  progressDiv.style.width = "0%"; 
+  fileDiv.appendChild(progressDiv);
+  var info = document.createElement("span");
+  progressDiv.appendChild(info); 
+  
+  document.getElementById("files").appendChild(fileDiv);
+ 
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', './upload', true);
+  xhr.setRequestHeader("Cache-Control", "no-cache");
+  
+  xhr.upload.onprogress = function(e) {
+    if (e.lengthComputable) {
+      var percentComplete = (e.loaded / e.total) * 100;
+      console.log(percentComplete + '% uploaded');
+      progressDiv.style.width = percentComplete+"%";
+    }
+  };
+ 
+  xhr.onload = function() {
+      fileDiv.className="progress";
+    if (this.status == 200) {
+      console.log('Server got:', this.response);
+      progressDiv.style.width = "100%";
+      info.innerHTML = this.response;
+    } else {
+      console.log('Error: ', this.response);
+      progressDiv.style.width = "100%";
+      progressDiv.className ="progress-bar progress-bar-danger";
+      info.innerHTML = "error";
+    }
+  };
+ 
+  xhr.send(fd);
+}
+</script>
+<!--[if IE]>
+<script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+<script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
+{% endblock %}
+

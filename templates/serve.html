@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+
+{% if indexes %}
+  <ul>
+  {% for file in indexes %}
+    <li><a href="{{ url_for('file', oid=file) }}">{{indexes[file]}}</a></li>
+  {% endfor %}
+  </ul>
+{% else %}
+empty
+{% endif %}
+{% endblock %}
