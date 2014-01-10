@@ -1,18 +1,12 @@
-from flask import Flask, make_response, session, redirect, url_for
-from flask import render_template
-from flask import request
-
-from pymongo import Connection
-from pymongo import MongoClient
+from flask import Flask, make_response, session, redirect, url_for, render_template, request
+from pymongo import Connection, MongoClient
 from bson.objectid import ObjectId
 from gridfs import GridFS
 from gridfs.errors import NoFile
-from werkzeug import secure_filename 
-from werkzeug import Response
-import datetime
+from werkzeug import secure_filename, Response
+from util.id_generator import id_generator
 
-import string
-import random
+import datetime
 
 app = Flask(__name__)
 app.secret_key = "really_secret_key"
@@ -28,13 +22,12 @@ FS = GridFS(FSDB)
 def hello():
     return render_template("upload.html") 
 
-def id_generator(size=6, chars=string.ascii_letters + string.digits):
-    return ''.join(random.choice(chars) for x in range(size))
-
 @app.route("/upload", methods=['POST'])
 def upload():
     if request.method == 'POST':
         files = request.files.getlist("file")
+        if len(files) < 1:
+            return "no files"
         indexes = {} 
         upload_id = id_generator() 
         for file in files:
@@ -54,15 +47,14 @@ def upload():
 @app.route('/<upload_id>')
 def show(upload_id):
     index = coll.find_one({"upload_id": upload_id})
-    session[upload_id] = upload_id;
+    session[upload_id] = "true";
     return render_template("serve.html", indexes=index['indexes'])
 
 @app.route('/file/<oid>')
 def file(oid):
-    #Check for session first.
     try:
         file = FS.get(ObjectId(oid))
-        if (file.upload_id in session):
+        if (file.upload_id not in session):
                 return redirect(url_for('show', upload_id = file.upload_id))
         response = make_response(file.read())
         response.mimetype = file.content_type
@@ -70,6 +62,10 @@ def file(oid):
         return response
     except NoFile:
         return "No file"
+
+@app.route('/files')
+def list_gridfs_files():
+    return str("<br>".join(FS.list())) 
 
 app.debug = True
 if __name__ == "__main__":

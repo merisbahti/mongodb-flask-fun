@@ -11,9 +11,11 @@
 </div>
 <script>
 document.querySelector('#afile').addEventListener('change', function(e) {
+  
   var files = document.getElementById("afile").files;
-  for (var i = 0; i < files.length; i++)
-    upload(files[i]);
+    upload(files);
+  //for (var i = 0; i < files.length; i++)
+  //  upload(files[i]);
 }, false);
 
 

@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
 
+{% if debugmsg %}
+  {{ debugmsg }}
+{% endif %}
 {% if indexes %}
   <ul>
   {% for file in indexes %}
