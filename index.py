@@ -47,6 +47,8 @@ def upload():
 @app.route('/<upload_id>')
 def show(upload_id):
     index = coll.find_one({"upload_id": upload_id})
+    if not index:
+        return "not found"
     session[upload_id] = "true";
     return render_template("serve.html", indexes=index['indexes'])
 
@@ -58,7 +60,7 @@ def file(oid):
                 return redirect(url_for('show', upload_id = file.upload_id))
         response = make_response(file.read())
         response.mimetype = file.content_type
-        response.headers['Content-Disposition'] = "attachment; filename=\""+file.upload_id+"\""
+        response.headers['Content-Disposition'] = "attachment; filename=\""+file.name+"\""
         return response
     except NoFile:
         return "No file"
