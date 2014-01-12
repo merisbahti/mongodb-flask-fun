@@ -24,25 +24,28 @@ def hello():
 
 @app.route("/upload", methods=['POST'])
 def upload():
-    if request.method == 'POST':
-        files = request.files.getlist("file")
-        if len(files) < 1:
-            return "no files"
-        indexes = {} 
-        upload_id = id_generator() 
-        for file in files:
-            filename = secure_filename(file.filename)
-            oid = FS.put(file, 
-                    content_type=file.content_type, 
-                    filename=filename,
-                    upload_id=upload_id)
-            indexes[str(oid)] = filename 
-        entry = {"upload_id": upload_id,
-                 "indexes": indexes,
-                 "date": datetime.datetime.utcnow()}
-        coll.insert(entry)
-        return " ".join([str(upload_id), str(oid)])
-    return "error"
+    try:
+        if request.method == 'POST':
+            files = request.files.getlist("file")
+            if len(files) < 1:
+                return "no files" + str(files)
+            indexes = {} 
+            upload_id = id_generator() 
+            for file in files:
+                filename = secure_filename(file.filename)
+                oid = FS.put(file, 
+                        content_type=file.content_type, 
+                        filename=filename,
+                        upload_id=upload_id)
+                indexes[str(oid)] = filename 
+            entry = {"upload_id": upload_id,
+                     "indexes": indexes,
+                     "date": datetime.datetime.utcnow()}
+            coll.insert(entry)
+            return "".join(["localhost:5000/", str(upload_id)])
+        return "error"
+    except OSError:
+        return "No space left on server!"
 
 @app.route('/<upload_id>')
 def show(upload_id):
@@ -58,7 +61,7 @@ def file(oid):
                 return redirect(url_for('show', upload_id = file.upload_id))
         response = make_response(file.read())
         response.mimetype = file.content_type
-        response.headers['Content-Disposition'] = "attachment; filename=\""+file.upload_id+"\""
+        response.headers['Content-Disposition'] = "attachment; filename=\""+file.name +"\""
         return response
     except NoFile:
         return "No file"
@@ -69,4 +72,4 @@ def list_gridfs_files():
 
 app.debug = True
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0')

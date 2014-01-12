@@ -1,29 +1,28 @@
 {% extends "layout.html" %}
 {% block body %}
+<div class="well">
 <input type="file" name="afile" id="afile" multiple/>
-
-<form action="/upload" method="POST" enctype="multipart/form-data">
-<input type="file" name="file" multiple/>
-<input type="submit">
-</form>
-
+</div>
 <div id="files" style="margin-top:10px">
 </div>
+
 <script>
-document.querySelector('#afile').addEventListener('change', function(e) {
-  
-  var files = document.getElementById("afile").files;
-    upload(files);
-  //for (var i = 0; i < files.length; i++)
-  //  upload(files[i]);
+
+document.querySelector('#afile').addEventListener('change', function(e) {  
+  afile = document.getElementById("afile")
+  var files = afile.files;
+  upload(files);
 }, false);
 
 
 var upload = function(file) {
   var fd = new FormData();
-  fd.append("file", file);
-  fd.append("source", "web"); 
-
+  //fd.append("file", file);
+  console.log(file.length)
+  for (var i = 0; i < file.length; i++) {
+    console.log(file[i].name);
+    fd.append("file",file[i]);
+  }
   var fileDiv = document.createElement("div");
   fileDiv.className = "progress progress-striped active";
   var progressDiv = document.createElement("div");
@@ -69,4 +68,3 @@ var upload = function(file) {
 <script>CFInstall.check({mode: 'overlay'});</script>
 <![endif]-->
 {% endblock %}
-

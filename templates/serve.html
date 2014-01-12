@@ -1,16 +1,17 @@
 {% extends "layout.html" %}
 {% block body %}
 
+<div class="well">
 {% if debugmsg %}
   {{ debugmsg }}
 {% endif %}
 {% if indexes %}
-  <ul>
+  <h2 style="margin-top:-5px">Someone wants you to have this:</h2>
   {% for file in indexes %}
-    <li><a href="{{ url_for('file', oid=file) }}">{{indexes[file]}}</a></li>
+<a style="margin:2px;" class="btn btn-default" href="{{ url_for('file', oid=file) }}"><img src="http://cdn-img.easyicon.net/png/303/30357.png" style="width:15px;height:15px;margin-top:-2px;"> {{indexes[file]}}</a>
   {% endfor %}
-  </ul>
 {% else %}
 empty
 {% endif %}
+</div>
 {% endblock %}
